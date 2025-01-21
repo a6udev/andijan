@@ -6,12 +6,12 @@ interface MenuItem {
   id: number;
   name: string;
   price: number;
-  results: any;
+  // results: any;
 }
 
 interface CartItem extends MenuItem {
   quantity: number;
-  results: any;
+  // results: any;
 }
 
 export default function OrderPage() {
@@ -24,7 +24,7 @@ export default function OrderPage() {
     const fetchMenuItems = async () => {
       try {
         const response = await axios.get("https://baxt.prolabagency.com/api/v1/products/");
-        setMenuItems(response.data);
+        setMenuItems(response.data.results);
       } catch (error) {
         alert("Ошибка загрузки меню.");
       }
@@ -119,7 +119,7 @@ export default function OrderPage() {
     <div className="flex min-h-screen bg-gray-200 p-6 flex-col lg:flex-row">
     {/* Menu Section */}
     <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {menuItems?.results?.map((item: any) => (
+      {menuItems?.map((item: any) => (
         <button
           key={item.id}
           onClick={() => addToCart(item)}
