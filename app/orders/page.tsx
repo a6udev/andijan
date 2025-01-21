@@ -1,41 +1,36 @@
-"use client";
-
-import React, { useState } from "react";
+"use client"
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 interface MenuItem {
   id: number;
   name: string;
   price: number;
+  results: any;
 }
 
 interface CartItem extends MenuItem {
   quantity: number;
+  results: any;
 }
 
 export default function OrderPage() {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const menuItems: MenuItem[] = [
-    { id: 1, name: "ЛАГМАН УЙГУР", price: 200 },
-    { id: 2, name: "Бризол", price: 200 },
-    { id: 3, name: "Бистроен", price: 200 },
-    { id: 4, name: "Лагман домашний", price: 190 },
-    { id: 5, name: "Манты", price: 220 },
-    { id: 6, name: "Самса", price: 50 },
-    { id: 7, name: "Шорпо", price: 150 },
-    { id: 8, name: "Мастава", price: 130 },
-    { id: 9, name: "Плов", price: 180 },
-    { id: 10, name: "Куурдак", price: 250 },
-    { id: 11, name: "Салат Оливье", price: 120 },
-    { id: 12, name: "Чебурек", price: 100 },
-    { id: 13, name: "Фрикадельки", price: 170 },
-    { id: 14, name: "Борщ", price: 160 },
-    { id: 15, name: "Сырники", price: 140 },
-    { id: 16, name: "Компот", price: 50 },
-    { id: 17, name: "Чай зелёный", price: 40 },
-    { id: 18, name: "Чай чёрный", price: 40 }
-  ];
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const response = await axios.get("https://baxt.prolabagency.com/api/v1/products/");
+        setMenuItems(response.data);
+      } catch (error) {
+        alert("Ошибка загрузки меню.");
+      }
+    };
+    fetchMenuItems();
+  }, []);
 
   const addToCart = (item: MenuItem) => {
     const existingItem = cart.find((cartItem) => cartItem.id === item.id);
@@ -71,66 +66,118 @@ export default function OrderPage() {
     }
   };
 
+  const handlePrintOrder = async () => {
+    if (cart.length === 0) {
+      alert("Корзина пуста!");
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        alert("Токен не найден. Пожалуйста, войдите в систему.");
+        return;
+      }
+  
+      const response = await axios.post(
+        "https://baxt.prolabagency.com/api/v1/orders/",
+        {
+          products: cart.map((item) => ({
+            product: item.id,
+            quantity: item.quantity,
+          })),
+        },
+        // {
+        //   product: cart[0].id,
+        //   quantity: cart[0].quantity
+        // },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+  
+      alert("Заказ успешно отправлен!");
+      setCart([]); 
+      setSelectedItems([]); 
+    } catch (error) {
+      console.error("Ошибка при отправке заказа:", error);
+      alert("Произошла ошибка при отправке заказа.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   return (
-    <div className="flex min-h-screen bg-gray-200 p-6">
-      {/* Menu Section */}
-      <div className="flex-1 grid grid-cols-4 gap-4">
-        {menuItems.map((item) => (
-          <button
+    <div className="flex min-h-screen bg-gray-200 p-6 flex-col lg:flex-row">
+    {/* Menu Section */}
+    <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {menuItems?.results?.map((item: any) => (
+        <button
+          key={item.id}
+          onClick={() => addToCart(item)}
+          className={`p-4 text-center rounded-lg ${
+            selectedItems.includes(item.id)
+              ? "bg-red-400"
+              : "bg-gray-300 hover:bg-red-400 transition-all duration-300"
+          }`}
+        >
+          <h3 className="font-bold">{item.name}</h3>
+          <p>{item.price} сом</p>
+        </button>
+      ))}
+    </div>
+  
+    {/* Cart Section */}
+    <div className="w-full sm:w-1/3 bg-gray-400 p-4 rounded-lg mt-6 sm:mt-0 sm:ml-[10px]">
+      <h2 className="font-bold text-xl mb-4">Корзина</h2>
+      <div className="space-y-2">
+        {cart?.map((item) => (
+          <div
             key={item.id}
-            onClick={() => addToCart(item)}
-            className={`p-4 text-center rounded-lg ${
-              selectedItems.includes(item.id)
-                ? "bg-red-400"
-                : "bg-gray-300 hover:bg-red-400 transition-all duration-300"
-            }`}
+            className="flex justify-between items-center bg-gray-200 p-2 rounded-lg"
           >
-            <h3 className="font-bold">{item.name}</h3>
-            <p>{item.price} сом</p>
-          </button>
+            <div>
+              <h3 className="font-bold">{item.name}</h3>
+              <p>{item.price} сом</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => removeFromCart(item)}
+                className="bg-red-500 text-white py-[5px] px-[15px] rounded-lg"
+              >
+                -
+              </button>
+              <span className="w-[20px] flex justify-center items-center">{item.quantity}</span>
+              <button
+                onClick={() => addToCart(item)}
+                className="bg-green-500 text-white  py-[5px] px-[15px] rounded-lg"
+              >
+                +
+              </button>
+            </div>
+          </div>
         ))}
       </div>
-
-      {/* Cart Section */}
-      <div className="w-1/3 bg-gray-400 p-4 rounded-lg ml-[10px]">
-        <h2 className="font-bold text-xl mb-4">Корзина</h2>
-        <div className="space-y-2">
-          {cart.map((item) => (
-            <div
-              key={item.id}
-              className="flex justify-between items-center bg-gray-200 p-2 rounded-lg"
-            >
-              <div>
-                <h3 className="font-bold">{item.name}</h3>
-                <p>{item.price} сом</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => removeFromCart(item)}
-                  className="bg-red-500 text-white px-2 py-1 rounded-lg"
-                >
-                  -
-                </button>
-                <span>{item.quantity}</span>
-                <button
-                  onClick={() => addToCart(item)}
-                  className="bg-green-500 text-white px-2 py-1 rounded-lg"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4">
-          <p className="font-bold text-lg">Итого: {total} сом</p>
-        </div>
-        <button className="w-full bg-red-500 text-white py-2 rounded-lg mt-4">
-        Печать чека
-        </button>
+      <div className="mt-4">
+        <p className="font-bold text-lg">Итого: {total} сом</p>
       </div>
+      <button
+        className="w-full bg-red-500 text-white py-2 rounded-lg mt-4"
+        onClick={handlePrintOrder}
+        disabled={loading}
+      >
+        {loading ? "Отправка..." : "Печать чека"}
+      </button>
     </div>
+  </div>
+  
   );
 }

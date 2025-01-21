@@ -29,18 +29,8 @@ export default function Page() {
         <nav>
           <ul className="flex space-x-4">
             <li>
-              <Link href="/" className="text-gray-700 hover:text-blue-500">
-                Главная
-              </Link>
-            </li>
-            <li>
-              <Link href="/menu" className="text-gray-700 hover:text-blue-500">
-                Меню
-              </Link>
-            </li>
-            <li>
               <Link href="/allOrders" className="text-gray-700 hover:text-blue-500">
-                Заказы
+               История заказов
               </Link>
             </li>
           </ul>
@@ -56,13 +46,7 @@ export default function Page() {
         </p>
         <div className="mt-8 flex space-x-4">
           <Link
-            href="/menu"
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg flex items-center space-x-2 hover:bg-blue-600 transition">
-            <span>Меню</span>
-            <ArrowRightIcon className="w-5 h-5" />
-          </Link>
-          <Link
-            href="/orders"
+            href="/login"
             className="px-6 py-3 bg-green-500 text-white rounded-lg flex items-center space-x-2 hover:bg-green-600 transition">
             <span>Заказы</span>
             <ArrowRightIcon className="w-5 h-5" />

@@ -1,279 +1,273 @@
+// "use client";
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+
+// // Define the structure of product data
+// interface Product {
+//   id: number;
+//   name: string;
+//   price: number;
+// }
+
+// // Define the structure of an order item
+// interface Order {
+//   total: any;
+//   created_at: any;
+//   products: any;
+//   user: any;
+//   id: number;
+//   product: Product;
+//   quantity: number;
+// }
+
+// const API_BASE_URL = "https://baxt.prolabagency.com/api/v1"; 
+
+// const OrderProducts: React.FC = () => {
+//   const [orderProducts, setOrderProducts] = useState<Order[]>([]);
+//   const [loading, setLoading] = useState<boolean>(true);
+//   const [error, setError] = useState<string | null>(null);
+
+//   const fetchOrderProducts = async (): Promise<void> => {
+//     try {
+//       const token = localStorage.getItem("token");
+//       if (!token) throw new Error("No token found");
+
+//       const response = await axios.get<{ results: Order[] }>(
+//         `${API_BASE_URL}/orders/`,
+//         {
+//           headers: {
+//             Authorization: `Token ${token}`,
+//           },
+//         }
+//       );
+
+//       setOrderProducts(response.data.results);
+//     } catch (err: any) {
+//       setError(err.response?.data?.detail || "Failed to fetch order products.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchOrderProducts();
+//   }, []);
+
+//   if (loading) return <div>Loading...</div>;
+//   if (error) return <div>Error: {error}</div>;
+
+//   console.log(orderProducts);
+
+//   return (
+//     <div className="container mx-auto p-4">
+//       <h1 className="text-2xl font-bold mb-6">
+//         История заказов
+//       </h1>
+//       <div className="overflow-x-auto bg-white p-4 shadow-md rounded-lg">
+//         <table className="w-full border-collapse">
+//           <thead>
+//             <tr className="bg-gray-200 text-left">
+//               <th className="p-3 border">#</th>
+//               <th className="p-3 border">Официант или Кассир</th>
+//               <th className="p-3 border">Блюда</th>
+//               <th className="p-3 border">Сумма</th>
+//               {/* <th className="p-3 border">Оплата</th> */}
+//               <th className="p-3 border">Время заказа</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {orderProducts.map((order) => (
+//               <tr key={order.id} className="hover:bg-gray-100">
+//                 <td className="p-3 border">{order.id}</td>
+//                 <td className="p-3 border">{order.user.first_name}</td>
+//                 <td className="p-3 border">
+//                   {order.products.map((item: any, idx: number) => (
+//                     <div key={idx}>
+//                       {item.product.name} x{item.quantity} (
+//                       {item.product.price * item.quantity} сом)
+//                     </div>
+//                   ))}
+//                 </td>
+//                 <td className="p-3 border">
+//                   {order.products.reduce(
+//                     (total: number, item: any) =>
+//                       total + item.product.price * item.quantity,
+//                     0 // Начальное значение суммы
+//                   )}{" "}
+//                   сом
+//                 </td>
+
+//                 {/* <td className="p-3 border">{order.paymentType}</td> */}
+//                 <td className="p-3 border">
+//                   {new Date(order.created_at).toLocaleString("ru-RU", {
+//                     year: "numeric",
+//                     month: "long",
+//                     day: "numeric",
+//                     hour: "2-digit",
+//                     minute: "2-digit",
+//                   })}
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default OrderProducts;
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-interface Order {
-    id: number;
-    waiterName: string;
-    items: { name: string; quantity: number; price: number }[];
-    total: number;
-    paymentType: "Cash" | "Card";
-    orderTime: string;
-  }
-
-interface Order {
+// Define the structure of product data
+interface Product {
   id: number;
-  waiterName: string;
-  items: { name: string; quantity: number; price: number }[];
-  total: number;
-  paymentType: "Cash" | "Card";
-  orderTime: string;
+  name: string;
+  price: number;
 }
 
-const OrderHistoryPage: React.FC = () => {
+// Define the structure of an order item
+interface Order {
+  total: any;
+  created_at: string;
+  products: any;
+  user: any;
+  id: number;
+  product: Product;
+  quantity: number;
+}
 
-    const orders: Order[] = [
+const API_BASE_URL = "https://baxt.prolabagency.com/api/v1"; 
+
+const OrderProducts: React.FC = () => {
+  const [orderProducts, setOrderProducts] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchOrderProducts = async (): Promise<void> => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const response = await axios.get<{ results: Order[] }>(
+        `${API_BASE_URL}/orders/`,
         {
-          id: 1,
-          waiterName: "Аман",
-          items: [
-            { name: "ЛАГМАН УЙГУР", quantity: 2, price: 200 },
-            { name: "Манты", quantity: 1, price: 220 },
-          ],
-          total: 620,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 12:45",
-        },
-        {
-          id: 2,
-          waiterName: "Бакыт",
-          items: [
-            { name: "Самса", quantity: 5, price: 50 },
-            { name: "Чай чёрный", quantity: 3, price: 40 },
-          ],
-          total: 350,
-          paymentType: "Card",
-          orderTime: "15.01.2025 13:20",
-        },
-        {
-          id: 3,
-          waiterName: "Жанара",
-          items: [
-            { name: "Шашлык", quantity: 3, price: 250 },
-            { name: "Салат Оливье", quantity: 1, price: 180 },
-          ],
-          total: 930,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 14:05",
-        },
-        {
-          id: 4,
-          waiterName: "Азамат",
-          items: [
-            { name: "Борщ", quantity: 1, price: 150 },
-            { name: "Компот", quantity: 2, price: 50 },
-          ],
-          total: 250,
-          paymentType: "Card",
-          orderTime: "15.01.2025 14:30",
-        },
-        {
-          id: 5,
-          waiterName: "Айгуль",
-          items: [
-            { name: "Плов", quantity: 3, price: 300 },
-            { name: "Лимонад", quantity: 3, price: 80 },
-          ],
-          total: 1140,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 15:00",
-        },
-        {
-          id: 6,
-          waiterName: "Данияр",
-          items: [
-            { name: "Чебурек", quantity: 4, price: 150 },
-            { name: "Морс", quantity: 2, price: 60 },
-          ],
-          total: 720,
-          paymentType: "Card",
-          orderTime: "15.01.2025 15:15",
-        },
-        {
-          id: 7,
-          waiterName: "Айнура",
-          items: [
-            { name: "Суп с лапшой", quantity: 2, price: 180 },
-            { name: "Салат Цезарь", quantity: 1, price: 250 },
-          ],
-          total: 610,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 15:40",
-        },
-        {
-          id: 8,
-          waiterName: "Марат",
-          items: [
-            { name: "Бифштекс", quantity: 2, price: 400 },
-            { name: "Гарнир", quantity: 1, price: 150 },
-          ],
-          total: 950,
-          paymentType: "Card",
-          orderTime: "15.01.2025 16:00",
-        },
-        {
-          id: 9,
-          waiterName: "Эльмира",
-          items: [
-            { name: "Блинчики", quantity: 5, price: 100 },
-            { name: "Сок яблочный", quantity: 3, price: 60 },
-          ],
-          total: 710,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 16:25",
-        },
-        {
-          id: 10,
-          waiterName: "Рустам",
-          items: [
-            { name: "Котлеты", quantity: 2, price: 200 },
-            { name: "Пюре картофельное", quantity: 2, price: 100 },
-          ],
-          total: 600,
-          paymentType: "Card",
-          orderTime: "15.01.2025 16:50",
-        },
-        {
-          id: 11,
-          waiterName: "Асел",
-          items: [
-            { name: "Салат Винегрет", quantity: 1, price: 150 },
-            { name: "Чай зелёный", quantity: 2, price: 40 },
-          ],
-          total: 230,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 17:05",
-        },
-        {
-          id: 12,
-          waiterName: "Нурбек",
-          items: [
-            { name: "Харчо", quantity: 1, price: 200 },
-            { name: "Компот", quantity: 1, price: 50 },
-          ],
-          total: 250,
-          paymentType: "Card",
-          orderTime: "15.01.2025 17:30",
-        },
-        {
-          id: 13,
-          waiterName: "Жанара",
-          items: [
-            { name: "Шашлык", quantity: 4, price: 250 },
-            { name: "Салат Оливье", quantity: 2, price: 180 },
-          ],
-          total: 1360,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 17:50",
-        },
-        {
-          id: 14,
-          waiterName: "Айнура",
-          items: [
-            { name: "Плов", quantity: 2, price: 300 },
-            { name: "Лимонад", quantity: 2, price: 80 },
-          ],
-          total: 760,
-          paymentType: "Card",
-          orderTime: "15.01.2025 18:00",
-        },
-        {
-          id: 15,
-          waiterName: "Аман",
-          items: [
-            { name: "Манты", quantity: 3, price: 220 },
-            { name: "Чай", quantity: 1, price: 40 },
-          ],
-          total: 700,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 18:20",
-        },
-        {
-          id: 16,
-          waiterName: "Марат",
-          items: [
-            { name: "Бифштекс", quantity: 3, price: 400 },
-            { name: "Гарнир", quantity: 2, price: 150 },
-          ],
-          total: 1450,
-          paymentType: "Card",
-          orderTime: "15.01.2025 18:40",
-        },
-        {
-          id: 17,
-          waiterName: "Азамат",
-          items: [
-            { name: "Суп с лапшой", quantity: 1, price: 180 },
-            { name: "Салат Цезарь", quantity: 1, price: 250 },
-          ],
-          total: 430,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 19:00",
-        },
-        {
-          id: 18,
-          waiterName: "Айгуль",
-          items: [
-            { name: "Самса", quantity: 4, price: 50 },
-            { name: "Чай чёрный", quantity: 2, price: 40 },
-          ],
-          total: 280,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 19:20",
-        },
-        {
-          id: 19,
-          waiterName: "Бакыт",
-          items: [
-            { name: "Шашлык", quantity: 3, price: 250 },
-            { name: "Компот", quantity: 3, price: 50 },
-          ],
-          total: 900,
-          paymentType: "Card",
-          orderTime: "15.01.2025 19:40",
-        },
-        {
-          id: 20,
-          waiterName: "Эльмира",
-          items: [
-            { name: "Плов", quantity: 5, price: 300 },
-            { name: "Салат Винегрет", quantity: 3, price: 150 },
-          ],
-          total: 1950,
-          paymentType: "Cash",
-          orderTime: "15.01.2025 20:00",
-        },
-      ];
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      setOrderProducts(response.data.results);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Failed to fetch order products.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrderProducts();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  // Группируем заказы по дате
+  const dailyTotals = orderProducts.reduce((acc: any, order) => {
+    const date = new Date(order.created_at).toLocaleDateString("ru-RU");
+    const total = order.products.reduce(
+      (sum: number, item: any) => sum + item.product.price * item.quantity,
+      0
+    );
+
+    if (!acc[date]) {
+      acc[date] = 0;
+    }
+    acc[date] += total;
+
+    return acc;
+  }, {});
+
+  // Преобразуем объект в массив для отображения
+  const dailyTotalsArray = Object.keys(dailyTotals).map(date => ({
+    date,
+    total: dailyTotals[date],
+  }));
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-bold mb-6">История заказов (последние 24 часа)</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">
+        История заказов
+      </h1>
+      
+    
+
       <div className="overflow-x-auto bg-white p-4 shadow-md rounded-lg">
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-200 text-left">
               <th className="p-3 border">#</th>
-              <th className="p-3 border">Официант</th>
+              <th className="p-3 border">Официант или Кассир</th>
               <th className="p-3 border">Блюда</th>
               <th className="p-3 border">Сумма</th>
-              {/* <th className="p-3 border">Оплата</th> */}
               <th className="p-3 border">Время заказа</th>
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
+            {orderProducts.map((order) => (
               <tr key={order.id} className="hover:bg-gray-100">
                 <td className="p-3 border">{order.id}</td>
-                <td className="p-3 border">{order.waiterName}</td>
+                <td className="p-3 border">{order.user.first_name}</td>
                 <td className="p-3 border">
-                  {order.items.map((item, idx) => (
+                  {order.products.map((item: any, idx: number) => (
                     <div key={idx}>
-                      {item.name} x{item.quantity} ({item.price * item.quantity} сом)
+                      {item.product.name} x{item.quantity} (
+                      {item.product.price * item.quantity} сом)
                     </div>
                   ))}
                 </td>
-                <td className="p-3 border">{order.total} сом</td>
-                {/* <td className="p-3 border">{order.paymentType}</td> */}
-                <td className="p-3 border">{order.orderTime}</td>
+                <td className="p-3 border">
+                  {order.products.reduce(
+                    (total: number, item: any) =>
+                      total + item.product.price * item.quantity,
+                    0 // Начальное значение суммы
+                  )}{" "}
+                  сом
+                </td>
+                <td className="p-3 border">
+                  {new Date(order.created_at).toLocaleString("ru-RU", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+
+        {/* Сумма по дням */}
+        <div className="mt-6">
+        <h2 className="text-xl font-semibold">Общая сумма по дням</h2>
+        <table className="w-full mt-4 border-collapse">
+          <thead>
+            <tr className="bg-gray-200 text-left">
+              <th className="p-3 border">Дата</th>
+              <th className="p-3 border">Общая сумма</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dailyTotalsArray.map((day, idx) => (
+              <tr key={idx} className="hover:bg-gray-100">
+                <td className="p-3 border">{day.date}</td>
+                <td className="p-3 border">{day.total} сом</td>
               </tr>
             ))}
           </tbody>
@@ -283,4 +277,4 @@ const OrderHistoryPage: React.FC = () => {
   );
 };
 
-export default OrderHistoryPage;
+export default OrderProducts;
