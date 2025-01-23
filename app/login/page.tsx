@@ -29,13 +29,13 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Вы какой официант ?</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Вы какой официант или кассир?</h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Телефон номер</label>
             <input
-              type="text"
+              type="tel"
               name="login"
               value={formData.login}
               onChange={handleChange}
